@@ -104,7 +104,7 @@
             `).join('');
             document.getElementById('doacoes').innerHTML = doacoesHTML;
             const total = doacoes.reduce((acc, curr) => acc + curr.valor, 0);
-            document.getElementById('valorTotal').innerHTML = `Valor total arrecadado: R$ ${total.toFixed(2)}`;
+            document.getElementById('valorTotal').innerHTML = `Valor total arrecadado: BR$ ${total.toFixed(2)}`;
         }
         function excluirDoacao(index) {
             if (confirm('Tem certeza que deseja excluir esta doação?')) {
