@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Central de Doações</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 20px;
+            background-color: #f0f4f8;
+            color: #333;
+        }
+        h1, h2 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        input[type="text"], input[type="number"] {
+            padding: 12px;
+            width: calc(100% - 24px);
+            margin: 8px 0;
+            border: 1px solid #bdc3c7;
+            border-radius: 5px;
+            transition: border-color 0.3s;
+        }
+        input[type="text"]:focus, input[type="number"]:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        button {
+            padding: 12px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 8px 0;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        #doacoes {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #ffffff;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .item {
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #bdc3c7;
+            border-radius: 5px;
+            background-color: #ecf0f1;
+            transition: background-color 0.3s;
+        }
+        .item:hover {
+            background-color: #dfe6e9;
+        }
+        .delete-button {
+            background-color: #e74c3c;
+        }
+        .delete-button:hover {
+            background-color: #c0392b;
+        }
+    </style>
+</head>
+<body>
+    <h1>Central de Controle de Doações</h1>
+    <input type="text" id="nomeInstituição" placeholder="Nome da instituição" required>
+    <input type="number" id="valorDoacao" placeholder="Valor da doação (R$)" min="0.01" step="0.01" required>
+    <button onclick="adicionarDoacao()">Registrar Doação</button>
+    <button onclick="visualizarDoacoes()">Visualizar Doações</button>
+    <button onclick="baixarDoacoes()">Baixar Registro de Doações</button>
+
+    <div id="doacoes"></div>
+    <div id="valorTotal"></div>
+
+    <script>
+        let doacoes = JSON.parse(localStorage.getItem('doacoes')) || [];
+        function adicionarDoacao() {
+            const nome = document.getElementById('nomeInstituição').value.trim();
+            const valor = parseFloat(document.getElementById('valorDoacao').value);
+            if (nome && valor > 0) {
+                doacoes.push({ nome, valor, data: new Date().toLocaleString() });
+                localStorage.setItem('doacoes', JSON.stringify(doacoes));
+                document.getElementById('nomeInstituição').value = '';
+                document.getElementById('valorDoacao').value = '';
+                alert('Doação registrada com sucesso!');
+                visualizarDoacoes();
+            } else {
+                alert('Preencha todos os campos corretamente!');
+            }
+        }
+        function visualizarDoacoes() {
+            const doacoesHTML = doacoes.map((d, index) => `
+                <div class="item">
+                    <h2>${d.nome}</h2>
+                    <p>Valor: R$ ${d.valor.toFixed(2)}</p>
+                    <p>Data: ${d.data}</p>
+                    <button class="delete-button" onclick="excluirDoacao(${index})">Excluir</button>
+                </div>
+            `).join('');
+            document.getElementById('doacoes').innerHTML = doacoesHTML;
+            const total = doacoes.reduce((acc, curr) => acc + curr.valor, 0);
+            document.getElementById('valorTotal').innerHTML = `Valor total arrecadado: R$ ${total.toFixed(2)}`;
+        }
+        function excluirDoacao(index) {
+            if (confirm('Tem certeza que deseja excluir esta doação?')) {
+                doacoes.splice(index, 1);
+                localStorage.setItem('doacoes', JSON.stringify(doacoes));
+                visualizarDoacoes();
+            }
+        }
+        function baixarDoacoes() {
+            const dataStr = JSON.stringify(doacoes, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'registro_doacoes.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        visualizarDoacoes();
+    </script>
+</body>
+</html>
